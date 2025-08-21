@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDF to Link — Uploadcare</title>
+  <style>
+    body{font-family:sans-serif;background:#0b1220;color:#e9eef5;display:grid;place-items:center;min-height:100vh;margin:0}
+    .card{width:min(680px,92vw);background:#111a2b;border:1px solid #22304d;border-radius:18px;padding:26px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    h1{margin:0 0 6px}
+    .btn{cursor:pointer;border:0;border-radius:12px;padding:12px 16px;background:#3b82f6;color:white}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .out{margin-top:14px;padding:12px;background:#091225;border:1px dashed #2a3a5e;border-radius:12px;word-break:break-all}
+    a{color:#78a6ff}
+  </style>
+  <script>
+    // आपकी Uploadcare Public Key
+    const UPLOADCARE_PUBLIC_KEY = 'ea59edd6760268f00ab8';
+  </script>
+  <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
+</head>
+<body>
+  <div class="card">
+    <h1>PDF Upload → Link</h1>
+    <input
+      type="hidden"
+      role="uploadcare-uploader"
+      data-public-key="ea59edd6760268f00ab8"
+      data-images-only="false"
+      data-multiple="false"
+      data-validators="pdfOnly"
+      id="uploader"
+    />
+
+    <div style="margin-top:12px">
+      <button class="btn" id="pick">PDF चुनें</button>
+      <button class="btn" id="copy" disabled>लिंक कॉपी करें</button>
+    </div>
+
+    <div class="out" id="out">लिंक यहाँ दिखेगा…</div>
+  </div>
+
+<script>
+  // सिर्फ PDF allow
+  uploadcare.validators.pdfOnly = function(fileInfo){
+    if (!fileInfo || !fileInfo.name) return;
+    if (!/\.pdf$/i.test(fileInfo.name)) {
+      throw new Error('कृपया सिर्फ PDF अपलोड करें।');
+    }
+  };
+
+  const widget = uploadcare.Widget('#uploader');
+  const pick = document.getElementById('pick');
+  const out = document.getElementById('out');
+  const copyBtn = document.getElementById('copy');
+
+  pick.addEventListener('click', ()=> widget.openDialog());
+
+  widget.onUploadComplete(info => {
+    const url = info.cdnUrl;
+    out.innerHTML = `<b>Link:</b> <a href="${url}" target="_blank">${url}</a>`;
+    copyBtn.disabled = false;
+    copyBtn.onclick = async () => {
+      await navigator.clipboard.writeText(url);
+      copyBtn.textContent = 'कॉपी हो गया ✅';
+      setTimeout(()=> copyBtn.textContent = 'लिंक कॉपी करें', 1500);
+    }
+  });
+</script>
+</body>
+  </html>
